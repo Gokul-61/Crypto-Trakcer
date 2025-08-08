@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoTrack - Login</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #00bcd4;
+            --primary-dark: #008c9e;
+            --bg-dark: #1a1a1a;
+            --bg-card: #2a2a2a;
+            --text-light: #ffffff;
+            --text-gray: #a0a0a0;
+            --error-red: #ff4444;
+            --success-green: #00ff00;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, var(--bg-dark), #2d2d2d);
+            color: var(--text-light);
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .auth-container {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        .auth-container h2 {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-gray);
+            font-size: 0.9rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--text-light);
+            font-size: 1rem;
+            transition: border-color 0.3s ease, background-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background-color: rgba(0, 188, 212, 0.1);
+        }
+
+        .cta-button {
+            width: 100%;
+            padding: 1rem;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 1rem;
+        }
+
+        .cta-button:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 188, 212, 0.3);
+        }
+
+        .message {
+            margin-top: 1.5rem;
+            padding: 0.8rem;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            display: none; /* Hidden by default, shown by JS */
+        }
+
+        .message.success {
+            background-color: rgba(0, 255, 0, 0.1);
+            color: var(--success-green);
+            border: 1px solid var(--success-green);
+        }
+
+        .message.error {
+            background-color: rgba(255, 0, 0, 0.1);
+            color: var(--error-red);
+            border: 1px solid var(--error-red);
+        }
+
+        .auth-container p {
+            margin-top: 1.5rem;
+            color: var(--text-gray);
+            font-size: 0.9rem;
+        }
+
+        .auth-container p a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .auth-container p a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <h2>Login to CryptoTrack</h2>
+        <div id="message" class="message"></div>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit" class="cta-button">Login</button>
+        </form>
+        <p>Don't have an account? <a href="/signup">Sign Up here</a></p>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const messageDiv = document.getElementById('message');
+
+            messageDiv.style.display = 'none';
+
+            try {
+    const response = await fetch('http://127.0.0.1:5000/api/login', { // <--- CHANGE THIS LINE
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+    });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    messageDiv.className = 'message success';
+                    messageDiv.textContent = data.message;
+                    messageDiv.style.display = 'block';
+                    // Redirect to profile or dashboard after successful login
+                    setTimeout(() => {
+                        window.location.href = '/profile'; // Or your main app page
+                    }, 1500);
+                } else {
+                    messageDiv.className = 'message error';
+                    messageDiv.textContent = data.error || 'Login failed.';
+                    messageDiv.style.display = 'block';
+
+                    // Special handling for unverified email
+                    if (data.action === 'verify_required') {
+                        // Optionally add a button to resend OTP or link to verification page
+                        const resendLink = document.createElement('a');
+                        resendLink.href = `/verify_otp?email=${encodeURIComponent(email)}`;
+                        resendLink.textContent = 'Go to verification page';
+                        resendLink.style.display = 'block';
+                        resendLink.style.marginTop = '10px';
+                        resendLink.style.color = 'var(--primary)';
+                        resendLink.style.textDecoration = 'underline';
+                        messageDiv.appendChild(resendLink);
+                    }
+                }
+            } catch (error) {
+                messageDiv.className = 'message error';
+                messageDiv.textContent = 'Network error or server unavailable.';
+                messageDiv.style.display = 'block';
+                console.error('Error:', error);
+            }
+        });
+    </script>
+</body>
+</html>

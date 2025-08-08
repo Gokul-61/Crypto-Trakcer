@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CryptoTrack - Paper Trading</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"> 
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #00bcd4;
+      --primary-dark: #008c9e;
+      --bg-dark: #1f1f1f;
+      --bg-card: #2a2a2a;
+      --text-light: #ffffff;
+      --text-gray: #a0a0a0;
+      --positive: #00ff00;
+      --negative: #ff4444;
+      --dropdown-bg: #1a1a1a;
+      --dropdown-option-hover: #3a3a3a;
+      --dropdown-option-selected: #666666;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, var(--bg-dark), #3a3a3a);
+      color: var(--text-light);
+      line-height: 1.6;
+      min-height: 100vh;
+      padding-top: 5rem; /* Consistent with other pages for sticky header */
+    }
+
+    header {
+      background-color: rgba(26, 26, 26, 0.95);
+      padding: 1rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    nav {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+    }
+
+    .nav-links a {
+      color: var(--text-light);
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .nav-links a:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: var(--primary);
+    }
+
+    @media (max-width: 768px) {
+      .nav-links span {
+        display: none;
+      }
+    }
+
+    .container {
+      width: 90%;
+      max-width: 1200px; /* Consistent with other pages */
+      margin: 2rem auto;
+    }
+
+    .card {
+      background: var(--bg-card);
+      padding: 2rem;
+      border-radius: 12px;
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .balance-card {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .balance-info h2 {
+      font-size: 1.2rem;
+      color: var(--text-gray);
+      margin-bottom: 0.5rem;
+    }
+
+    .balance-amount {
+      font-size: 2.5rem;
+      font-weight: bold;
+      color: var(--primary);
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: var(--text-gray);
+      font-size: 0.9rem;
+    }
+
+    /* Updated dropdown styling */
+    .form-select {
+      width: 100%;
+      padding: 1rem;
+      background-color: var(--dropdown-bg);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      color: var(--text-light);
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%23a0a0a0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>');
+      background-repeat: no-repeat;
+      background-position: right 1rem center;
+      cursor: pointer;
+    }
+
+    .form-select:focus {
+      outline: none;
+      border-color: var(--primary);
+      background-color: var(--dropdown-bg);
+    }
+
+    .form-select option {
+      background-color: var(--dropdown-bg);
+      color: var(--text-light);
+      padding: 10px;
+    }
+
+    .form-select option:hover {
+      background-color: var(--dropdown-option-hover);
+    }
+
+    .form-select option:checked {
+      background-color: var(--dropdown-option-selected);
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      color: var(--text-light);
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .btn {
+      padding: 1rem 2rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      flex: 1;
+      text-align: center;
+    }
+
+    .btn-buy {
+      background-color: rgba(0, 255, 0, 0.2);
+      color: var(--positive);
+    }
+
+    .btn-buy:hover {
+      background-color: rgba(0, 255, 0, 0.3);
+    }
+
+    .btn-sell {
+      background-color: rgba(255, 0, 0, 0.2);
+      color: var(--negative);
+    }
+
+    .btn-sell:hover {
+      background-color: rgba(255, 0, 0, 0.3);
+    }
+
+    .message {
+      padding: 1rem;
+      margin-top: 1rem;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      text-align: center;
+      color: var(--text-light);
+    }
+
+    .tabs {
+      display: flex;
+      margin-bottom: 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .tab {
+      padding: 1rem 2rem;
+      cursor: pointer;
+      color: var(--text-gray);
+      transition: all 0.3s ease;
+      border-bottom: 2px solid transparent;
+    }
+
+    .tab.active {
+      color: var(--primary);
+      border-bottom: 2px solid var(--primary);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .portfolio-list,
+    .history-list {
+      list-style: none;
+    }
+
+    .portfolio-item,
+    .history-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .portfolio-item:last-child,
+    .history-item:last-child {
+      border-bottom: none;
+    }
+
+    .portfolio-coin {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .coin-icon {
+      width: 32px;
+      height: 32px;
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary);
+    }
+
+    .history-type {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.9rem;
+    }
+
+    .history-type.buy {
+      background: rgba(0, 255, 0, 0.1);
+      color: var(--positive);
+    }
+
+    .history-type.sell {
+      background: rgba(255, 0, 0, 0.1);
+      color: var(--negative);
+    }
+
+    .chart-container {
+      height: 500px;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      color: var(--text-gray);
+    }
+
+    @media (max-width: 768px) {
+      .nav-links span {
+        display: none;
+      }
+      
+      .balance-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+      
+      .form-actions {
+        flex-direction: column;
+      }
+      
+      .container {
+        width: 95%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="{{ url_for('index') }}" class="logo">
+        <i class="fas fa-chart-line"></i>
+        CryptoTrack
+      </a>
+      <div class="nav-links">
+  <a href="{{ url_for('index') }}">
+    <i class="fas fa-table"></i>
+    <span>Markets</span>
+  </a>
+  <a href="{{ url_for('home_page') }}">
+    <i class="fas fa-home"></i>
+    <span>Dashboard</span>
+  </a>
+  <a href="{{ url_for('paper_trading_page') }}">
+    <i class="fas fa-wallet"></i>
+    <span>Paper Trading</span>
+  </a>
+  <a href="{{ url_for('news_page') }}">
+    <i class="fas fa-newspaper"></i>
+    <span>News</span>
+  </a>
+  <a href="{{ url_for('learn_page') }}">
+    <i class="fas fa-book"></i>
+    <span>Learn</span>
+  </a>
+  {% if session.user %}
+  <a href="{{ url_for('profile') }}">
+    <i class="fas fa-user"></i>
+    <span>Profile</span>
+  </a>
+  <a href="{{ url_for('logout') }}">
+    <i class="fas fa-sign-out-alt"></i>
+    <span>Logout</span>
+  </a>
+  {% else %}
+  <a href="{{ url_for('login_page') }}">
+    <i class="fas fa-sign-in-alt"></i>
+    <span>Login</span>
+  </a>
+  <a href="{{ url_for('signup_page') }}">
+    <i class="fas fa-user-plus"></i>
+    <span>Sign Up</span>
+  </a>
+  {% endif %}
+</div>
+    </nav>
+  </header>
+
+  <div class="container">
+    <div class="card balance-card">
+      <div class="balance-info">
+        <h2>Available Balance</h2>
+        <div class="balance-amount" id="balance">$0.00</div>
+      </div>
+      <div>
+        <i class="fas fa-wallet fa-3x" style="color: var(--primary);"></i>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 style="margin-bottom: 1.5rem;">Place Trade</h2>
+      <div class="form-group">
+        <label for="coin" class="form-label">Select Cryptocurrency</label>
+        <select id="coin" class="form-select">
+          <option value="bitcoin">Bitcoin (BTC)</option>
+          <option value="ethereum">Ethereum (ETH)</option>
+          <option value="binancecoin">Binance Coin (BNB)</option>
+          <option value="ripple">Ripple (XRP)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="amount" class="form-label">Amount (Number of Coins)</label>
+        <input type="number" id="amount" class="form-input" placeholder="0.00">
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-buy" onclick="placeTrade('buy')">
+          <i class="fas fa-arrow-up"></i> Buy
+        </button>
+        <button class="btn btn-sell" onclick="placeTrade('sell')">
+          <i class="fas fa-arrow-down"></i> Sell
+        </button>
+      </div>
+      <div id="message" class="message" style="display: none;"></div>
+    </div>
+
+    <div class="card">
+      <div class="tabs">
+        <div class="tab active" data-tab="portfolio">Portfolio</div>
+        <div class="tab" data-tab="history">Trade History</div>
+      </div>
+      <div class="tab-content active" id="portfolio-tab">
+        <ul class="portfolio-list" id="portfolio">
+          <div class="loading">Loading portfolio data...</div>
+        </ul>
+      </div>
+      <div class="tab-content" id="history-tab">
+        <ul class="history-list" id="history">
+          <div class="loading">Loading trade history...</div>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 style="margin-bottom: 1.5rem;">Price Chart</h2>
+      <div class="chart-container">
+        <div id="tvchart"></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+  <script>
+    const API_BASE = 'http://127.0.0.1:5000/api'; // Consistent API base URL
+    const coinIcons = {
+      'bitcoin': 'fab fa-bitcoin',
+      'ethereum': 'fab fa-ethereum',
+      'binancecoin': 'fas fa-coins',
+      'ripple': 'fas fa-water'
+    };
+
+    // Initialize tabs
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        
+        tab.classList.add('active');
+        document.getElementById(`${tab.dataset.tab}-tab`).classList.add('active');
+      });
+    });
+
+    async function loadBalance() {
+      try {
+        const res = await fetch(`${API_BASE}/balance`);
+        const data = await res.json();
+        document.getElementById('balance').innerText = `$${data.balance.toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        })}`;
+      } catch (error) {
+        console.error('Error loading balance:', error);
+        document.getElementById('balance').innerText = '$10,000.00'; /* Fallback */
+      }
+    }
+
+    async function loadPortfolio() {
+      try {
+        const res = await fetch(`${API_BASE}/portfolio`);
+        const data = await res.json();
+        const portfolioEl = document.getElementById('portfolio');
+        
+        if (Object.keys(data.portfolio).length === 0) {
+          portfolioEl.innerHTML = '<div style="padding: 2rem; text-align: center; color: var(--text-gray);">No coins in portfolio yet</div>';
+          return;
+        }
+        
+        portfolioEl.innerHTML = '';
+        for (let coin in data.portfolio) {
+          const coinName = getCoinName(coin);
+          const iconClass = coinIcons[coin] || 'fas fa-coins';
+          
+          portfolioEl.innerHTML += `
+            <li class="portfolio-item">
+              <div class="portfolio-coin">
+                <div class="coin-icon">
+                  <i class="${iconClass}"></i>
+                </div>
+                <div>
+                  <div>${coinName}</div>
+                  <div style="color: var(--text-gray); font-size: 0.8rem;">${coin.toUpperCase()}</div>
+                </div>
+              </div>
+              <div>
+                <div style="font-weight: bold;">${data.portfolio[coin]}</div>
+                <div style="color: var(--text-gray); font-size: 0.8rem;">Coins</div>
+              </div>
+            </li>
+          `;
+        }
+      } catch (error) {
+        console.error('Error loading portfolio:', error);
+        const portfolioEl = document.getElementById('portfolio');
+        portfolioEl.innerHTML = '<div style="padding: 2rem; text-align: center; color: var(--text-gray);">Failed to load portfolio data</div>';
+      }
+    }
+
+    async function loadHistory() {
+      try {
+        const res = await fetch(`${API_BASE}/history`);
+        const data = await res.json();
+        const historyEl = document.getElementById('history');
+        
+        if (data.history.length === 0) {
+          historyEl.innerHTML = '<div style="padding: 2rem; text-align: center; color: var(--text-gray);">No trade history yet</div>';
+          return;
+        }
+        
+        historyEl.innerHTML = '';
+        data.history.forEach(trade => {
+          const coinName = getCoinName(trade.coin);
+          const tradeTypeClass = trade.type === 'buy' ? 'buy' : 'sell';
+          const tradeIcon = trade.type === 'buy' ? 'fa-arrow-up' : 'fa-arrow-down';
+          
+          // CORRECTED: Display actual trade timestamp
+          const tradeDate = new Date(trade.timestamp).toLocaleString(); 
+
+          historyEl.innerHTML += `
+            <li class="history-item">
+              <div>
+                <div style="font-weight: bold;">${coinName} (${trade.coin.toUpperCase()})</div>
+                <div style="color: var(--text-gray); font-size: 0.8rem;">${tradeDate}</div>
+              </div>
+              <div>
+                <div style="font-weight: bold;">${trade.amount} coins @ $${trade.price.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2
+                })}</div>
+                <div class="history-type ${tradeTypeClass}">
+                  <i class="fas ${tradeIcon}"></i>
+                  ${trade.type.toUpperCase()}
+                </div>
+              </div>
+            </li>
+          `;
+        });
+      } catch (error) {
+        console.error('Error loading history:', error);
+        const historyEl = document.getElementById('history');
+        historyEl.innerHTML = '<div style="padding: 2rem; text-align: center; color: var(--text-gray);">Failed to load trade history</div>';
+      }
+    }
+
+    async function placeTrade(type) {
+      const messageEl = document.getElementById('message');
+      const coin = document.getElementById('coin').value;
+      const amount = parseFloat(document.getElementById('amount').value);
+      
+      if (!amount || amount <= 0) {
+        messageEl.innerHTML = 'Please enter a valid amount';
+        messageEl.style.display = 'block';
+        messageEl.style.backgroundColor = 'rgba(255, 0, 0, 0.2)';
+        setTimeout(() => {
+          messageEl.style.display = 'none';
+        }, 3000);
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/trade`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ coin_id: coin, amount, type })
+        });
+
+        const data = await res.json();
+        
+        if (data.error) {
+          messageEl.innerHTML = data.error;
+          messageEl.style.backgroundColor = 'rgba(255, 0, 0, 0.2)';
+        } else {
+          messageEl.innerHTML = data.message || `Successfully ${type === 'buy' ? 'bought' : 'sold'} ${amount} ${coin.toUpperCase()}`;
+          messageEl.style.backgroundColor = 'rgba(0, 255, 0, 0.2)';
+          document.getElementById('amount').value = '';
+        }
+        
+        messageEl.style.display = 'block';
+        setTimeout(() => {
+          messageEl.style.display = 'none';
+        }, 3000);
+        
+        loadBalance();
+        loadPortfolio();
+        loadHistory();
+      } catch (error) {
+        console.error('Error making trade:', error);
+        messageEl.innerHTML = 'Error processing your trade. Please try again.';
+        messageEl.style.backgroundColor = 'rgba(255, 0, 0, 0.2)';
+        messageEl.style.display = 'block';
+        setTimeout(() => {
+          messageEl.style.display = 'none';
+        }, 3000);
+      }
+    }
+
+    function getCoinName(coinId) {
+      const coinNames = {
+        'bitcoin': 'Bitcoin',
+        'ethereum': 'Ethereum',
+        'binancecoin': 'Binance Coin',
+        'ripple': 'Ripple'
+      };
+      return coinNames[coinId] || coinId;
+    }
+
+    function loadChart(symbol) {
+      const chartDiv = document.getElementById("tvchart");
+      chartDiv.innerHTML = ""; // Clear previous chart
+
+      new TradingView.widget({
+        "width": "100%",
+        "height": 450,
+        "symbol": `BINANCE:${symbol}USDT`,
+        "interval": "30",
+        "timezone": "Etc/UTC",
+        "theme": "dark",
+        "style": "1",
+        "locale": "en",
+        "toolbar_bg": "#2a2a2a",
+        "enable_publishing": false,
+        "hide_side_toolbar": false,
+        "container_id": "tvchart",
+        "backgroundColor": "#2a2a2a",
+        "gridColor": "rgba(255, 255, 255, 0.05)",
+        "trendLineColor": "#00bcd4",
+        "studies": ["RSI@tv-basicstudies"]
+      });
+    }
+
+    const tradingViewSymbols = {
+      bitcoin: "BTC",
+      ethereum: "ETH",
+      binancecoin: "BNB",
+      ripple: "XRP"
+    };
+
+    document.getElementById('coin').addEventListener('change', function () {
+      const coinId = this.value;
+      const symbol = tradingViewSymbols[coinId];
+      loadChart(symbol);
+    });
+
+    window.onload = function () {
+      loadBalance();
+      loadPortfolio();
+      loadHistory();
+      const initialSymbol = tradingViewSymbols[document.getElementById('coin').value];
+      loadChart(initialSymbol);
+    };
+  </script>
+</body>
+</html>

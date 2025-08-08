@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoTrack - Verify Email</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #00bcd4;
+            --primary-dark: #008c9e;
+            --bg-dark: #1a1a1a;
+            --bg-card: #2a2a2a;
+            --text-light: #ffffff;
+            --text-gray: #a0a0a0;
+            --error-red: #ff4444;
+            --success-green: #00ff00;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, var(--bg-dark), #2d2d2d);
+            color: var(--text-light);
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .auth-container {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        .auth-container h2 {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+        }
+
+        .auth-container p.instruction {
+            color: var(--text-gray);
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-gray);
+            font-size: 0.9rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--text-light);
+            font-size: 1rem;
+            transition: border-color 0.3s ease, background-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background-color: rgba(0, 188, 212, 0.1);
+        }
+
+        .cta-button {
+            width: 100%;
+            padding: 1rem;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 1rem;
+        }
+
+        .cta-button:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 188, 212, 0.3);
+        }
+
+        .message {
+            margin-top: 1.5rem;
+            padding: 0.8rem;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            display: none; /* Hidden by default, shown by JS */
+        }
+
+        .message.success {
+            background-color: rgba(0, 255, 0, 0.1);
+            color: var(--success-green);
+            border: 1px solid var(--success-green);
+        }
+
+        .message.error {
+            background-color: rgba(255, 0, 0, 0.1);
+            color: var(--error-red);
+            border: 1px solid var(--error-red);
+        }
+
+        .auth-links {
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+        }
+
+        .auth-links a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: bold;
+            margin: 0 10px;
+        }
+
+        .auth-links a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <h2>Verify Your Email</h2>
+        <p class="instruction">An OTP has been sent to your email address. Please enter it below to verify your account.</p>
+        <div id="message" class="message"></div>
+        <form id="otpForm">
+            <div class="form-group">
+                <label for="otp">One-Time Password (OTP)</label>
+                <input type="text" id="otp" name="otp" required maxlength="6" pattern="\d{6}">
+            </div>
+            <button type="submit" class="cta-button">Verify Account</button>
+        </form>
+        <div class="auth-links">
+            <a href="#" id="resendOtpLink">Resend OTP</a> | <a href="/login">Go to Login</a>
+        </div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const emailFromUrl = urlParams.get('email'); // Get email from URL if redirected from signup
+
+        document.getElementById('otpForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const otp = document.getElementById('otp').value;
+            const email = emailFromUrl || prompt("Please enter your email to verify:"); // Ask if not in URL
+            const messageDiv = document.getElementById('message');
+
+            messageDiv.style.display = 'none';
+
+            if (!email) {
+                messageDiv.className = 'message error';
+                messageDiv.textContent = 'Email is required for verification.';
+                messageDiv.style.display = 'block';
+                return;
+            }
+
+            // ... (inside the submit event listener for otpForm)
+try {
+    const response = await fetch('http://127.0.0.1:5000/api/verify_otp', { // <--- CHANGE THIS LINE
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, otp }),
+    });
+    // ...
+} catch (error) {
+    // ...
+}
+
+// ... (inside the click event listener for resendOtpLink)
+try {
+    const response = await fetch('http://127.0.0.1:5000/api/resend_otp', { // <--- CHANGE THIS LINE
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+    });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    messageDiv.className = 'message success';
+                    messageDiv.textContent = data.message;
+                    messageDiv.style.display = 'block';
+                    setTimeout(() => {
+                        window.location.href = '/login'; // Redirect to login after successful verification
+                    }, 2000);
+                } else {
+                    messageDiv.className = 'message error';
+                    messageDiv.textContent = data.error || 'OTP verification failed.';
+                    messageDiv.style.display = 'block';
+                }
+            } catch (error) {
+                messageDiv.className = 'message error';
+                messageDiv.textContent = 'Network error or server unavailable.';
+                messageDiv.style.display = 'block';
+                console.error('Error:', error);
+            }
+        });
+
+        document.getElementById('resendOtpLink').addEventListener('click', async function(event) {
+            event.preventDefault();
+            const email = emailFromUrl || prompt("Please enter your email to resend OTP:");
+            const messageDiv = document.getElementById('message');
+
+            messageDiv.style.display = 'none';
+
+            if (!email) {
+                messageDiv.className = 'message error';
+                messageDiv.textContent = 'Email is required to resend OTP.';
+                messageDiv.style.display = 'block';
+                return;
+            }
+
+            try {
+    const response = await fetch('http://127.0.0.1:5000/api/resend_otp', { // <--- CHANGE THIS LINE
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+    });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    messageDiv.className = 'message success';
+                    messageDiv.textContent = data.message;
+                    messageDiv.style.display = 'block';
+                } else {
+                    messageDiv.className = 'message error';
+                    messageDiv.textContent = data.error || 'Failed to resend OTP.';
+                    messageDiv.style.display = 'block';
+                }
+            } catch (error) {
+                messageDiv.className = 'message error';
+                messageDiv.textContent = 'Network error or server unavailable.';
+                messageDiv.style.display = 'block';
+                console.error('Error:', error);
+            }
+        });
+
+        // Pre-fill email field if present in URL (for potential future use if we add an email input)
+        // const emailInput = document.getElementById('email'); // If you add an email input field
+        // if (emailInput && emailFromUrl) {
+        //     emailInput.value = emailFromUrl;
+        // }
+    </script>
+</body>
+</html>

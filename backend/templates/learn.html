@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cryptocurrency Learning</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"> 
+
+    <style>
+        /* Define root variables for consistency with other pages */
+        :root {
+            --primary: #00bcd4;
+            --primary-dark: #008c9e;
+            --bg-dark: #1a1a1a;
+            --bg-card: #2a2a2a;
+            --text-light: #ffffff;
+            --text-gray: #a0a0a0;
+            --error-red: #ff4444;
+            --success-green: #00ff00;
+        }
+
+        /* Global reset and body styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; /* Consistent font */
+            background: linear-gradient(135deg, var(--bg-dark), #2d2d2d); /* Consistent background */
+            color: var(--text-light);
+            line-height: 1.6;
+            min-height: 100vh;
+            /* No padding-top needed here as there's no global sticky header */
+        }
+
+        /* Custom Header for learn.html (single navigation bar) */
+        .learn-page-header { 
+            background-color: var(--bg-dark);
+            padding: 2rem 1rem 1rem; /* Adjust padding as needed */
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .learn-page-header h1 {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            background: linear-gradient(45deg, var(--primary), #80deea);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .learn-page-header p {
+            font-size: 1.2rem;
+            color: var(--text-gray);
+            margin-bottom: 1.5rem;
+        }
+
+        /* Styling for the combined navigation bar within the header */
+        .learn-page-nav-combined { /* New class for the single nav bar */
+            display: flex;
+            flex-wrap: wrap; 
+            justify-content: center; 
+            gap: 15px; 
+            padding: 10px 0;
+            background-color: rgba(0, 0, 0, 0.2); 
+            border-radius: 8px;
+            margin: 1.5rem auto 0; /* Center it and provide top margin */
+            max-width: 900px; /* Constrain width of this nav bar */
+        }
+
+        .learn-page-nav-combined a {
+            color: var(--text-light); /* Changed from primary to text-light for better contrast on dark bg */
+            text-decoration: none;
+            padding: 8px 15px; 
+            border-radius: 5px;
+            transition: all 0.3s ease; 
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            white-space: nowrap; 
+        }
+
+        .learn-page-nav-combined a:hover {
+            background-color: var(--primary-dark);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        @media (max-width: 768px) {
+            .learn-page-header h1 {
+                font-size: 2.5rem;
+            }
+            .learn-page-header p {
+                font-size: 1rem;
+            }
+            .learn-page-nav-combined {
+                flex-direction: column; /* Stack vertically on very small screens */
+                gap: 5px;
+                padding: 10px;
+            }
+        }
+
+
+        /* Content Container styles */
+        .container {
+            width: 90%;
+            max-width: 1200px; /* Consistent width with other pages */
+            margin: 20px auto; /* Adjust margin as no longer directly below global header */
+            background-color: var(--bg-card);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Content section headers */
+        h2 {
+            font-size: 2rem;
+            margin-top: 40px;
+            margin-bottom: 15px;
+            color: var(--primary-dark);
+            text-align: center;
+        }
+
+        h3 {
+            font-size: 1.4rem;
+            color: var(--text-light);
+            margin-top: 25px;
+            margin-bottom: 10px;
+        }
+
+        p {
+            margin-bottom: 15px;
+            color: var(--text-light);
+            font-size: 1.05rem;
+            line-height: 1.8;
+        }
+
+        ul, ol {
+            margin-bottom: 15px;
+            padding-left: 25px;
+            color: var(--text-light);
+        }
+
+        li {
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+
+        b {
+            color: var(--primary);
+            font-weight: bold;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background-color: rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            color: var(--text-gray);
+        }
+
+        th {
+            background-color: rgba(0,0,0,0.2);
+            color: var(--primary);
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        tr:hover {
+            background-color: rgba(255,255,255,0.03);
+        }
+
+        section {
+            padding-top: 20px;
+            padding-bottom: 20px;
+        }
+        
+        /* Footer (consistent with other pages) */
+        footer {
+            background: var(--bg-dark);
+            padding: 2rem 1rem;
+            text-align: center;
+            margin-top: 4rem;
+            color: var(--text-gray);
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            text-align: left;
+        }
+
+        .footer-section h4 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-section ul li a {
+            color: var(--text-gray);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-section ul li a:hover {
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+
+    <header class="learn-page-header"> <h1>Cryptocurrency Learning</h1>
+        <p>A Deep Dive into Digital Currencies and Blockchain</p>
+
+        <nav class="learn-page-nav-combined">
+            <a href="{{ url_for('home_page') }}"><i class="fas fa-home"></i> Home</a> 
+            <a href="#intro"><i class="fas fa-info-circle"></i> Intro</a>
+            <a href="#history"><i class="fas fa-history"></i> History</a>
+            <a href="#blockchain"><i class="fas fa-link"></i> Blockchain</a>
+            <a href="#types"><i class="fas fa-coins"></i> Types</a>
+            <a href="#mining"><i class="fas fa-hammer"></i> Mining</a>
+            <a href="#wallets"><i class="fas fa-wallet"></i> Wallets</a>
+            <a href="#trading"><i class="fas fa-exchange-alt"></i> Trading</a>
+            <a href="#risks"><i class="fas fa-exclamation-triangle"></i> Risks</a>
+            <a href="#regulations"><i class="fas fa-balance-scale"></i> Regulations</a>
+            <a href="#future"><i class="fas fa-chart-line"></i> Future</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <section id="intro">
+            <h2>Introduction to Cryptocurrency</h2>
+            <p>Cryptocurrency is a digital form of money designed to be secure, decentralized, and operate without the control of governments or financial institutions. Unlike traditional currencies, cryptocurrencies rely on <b>blockchain technology</b> to maintain a secure and transparent transaction record.</p>
+            
+            <h3>🔹 How Cryptocurrencies Work</h3>
+            <ul>
+                <li>Each transaction is recorded on a <b>public ledger</b> known as a blockchain.</li>
+                <li>Transactions are verified by a network of computers known as <b>nodes</b>.</li>
+                <li>Instead of banks, users manage their funds using <b>cryptographic keys</b>.</li>
+            </ul>
+            
+            <h3>🔹 Real-World Adoption</h3>
+            <p>Many companies accept Bitcoin and other cryptocurrencies for payments. For example:</p>
+            <ul>
+                <li><b>Tesla</b> accepts Bitcoin for car purchases.</li>
+                <li><b>Microsoft</b> allows users to pay for services using Bitcoin.</li>
+                <li><b>El Salvador</b> became the first country to adopt Bitcoin as legal tender in 2021.</li>
+            </ul>
+        </section>
+
+        <section id="history">
+            <h2>History of Cryptocurrency</h2>
+            <p>Cryptocurrency traces its origins to <b>Bitcoin</b>, which was created by an anonymous developer known as <b>Satoshi Nakamoto</b> in 2009.</p>
+
+            <h3>🔹 Key Milestones</h3>
+            <ul>
+                <li><strong>2009:</strong> Bitcoin's first block, known as the <b>Genesis Block</b>, was mined.</li>
+                <li><strong>2010:</strong> The first real-world Bitcoin transaction took place when <b>10,000 BTC</b> were used to buy two pizzas.</li>
+                <li><strong>2015:</strong> Ethereum introduced <b>smart contracts</b>, revolutionizing blockchain applications.</li>
+                <li><strong>2020:</strong> The rise of <b>Decentralized Finance (DeFi)</b> and <b>Non-Fungible Tokens (NFTs)</b>.</li>
+            </ul>
+
+            <h3>🔹 Case Study: Bitcoin's Growth</h3>
+            <p>Bitcoin started at a value of less than <b>$1</b> and has reached prices over <b>$60,000</b> per BTC. This rapid growth has attracted both investors and regulators worldwide.</p>
+        </section>
+
+        <section id="blockchain">
+            <h2>Blockchain Technology</h2>
+            <p>Blockchain is the <b>underlying technology</b> that powers cryptocurrencies. It is a distributed, tamper-proof ledger that records transactions in a decentralized manner.</p>
+
+            <h3>🔹 How Blockchain Works</h3>
+            <ol>
+                <li>Transactions are grouped into <b>blocks</b>.</li>
+                <li>Each block is secured with a <b>cryptographic hash</b>.</li>
+                <li>Blocks are linked together, forming a <b>chain</b>.</li>
+                <li>Consensus mechanisms like <b>Proof of Work (PoW)</b> and <b>Proof of Stake (PoS)</b> validate transactions.</li>
+            </ol>
+
+            <h3>🔹 Applications Beyond Cryptocurrency</h3>
+            <ul>
+                <li><b>Supply Chain</b>: Companies like Walmart use blockchain to track product movement.</li>
+                <li><b>Healthcare</b>: Blockchain secures patient records.</li>
+                <li><b>Voting</b>: Some governments explore blockchain for election transparency.</li>
+            </ul>
+        </section>
+
+        <section id="types">
+            <h2>Types of Cryptocurrencies</h2>
+            <p>There are thousands of cryptocurrencies, but they can be classified into different categories:</p>
+
+            <table>
+                <tr>
+                    <th>Type</th>
+                    <th>Example</th>
+                    <th>Use Case</th>
+                </tr>
+                <tr>
+                    <td>Store of Value</td>
+                    <td>Bitcoin (BTC)</td>
+                    <td>Digital gold, long-term investment</td>
+                </tr>
+                <tr>
+                    <td>Smart Contracts</td>
+                    <td>Ethereum (ETH)</td>
+                    <td>Decentralized applications</td>
+                </tr>
+                <tr>
+                    <td>Stablecoins</td>
+                    <td>USDT, USDC</td>
+                    <td>Maintains value relative to fiat currency</td>
+                </tr>
+            </table>
+        </section>
+
+        <section id="mining">
+            <h2>Cryptocurrency Mining</h2>
+            <p>Mining is the process of verifying transactions and adding them to the blockchain. Miners use powerful computers to solve cryptographic puzzles.</p>
+
+            <h3>🔹 Consensus Mechanisms</h3>
+            <ul>
+                <li><strong>Proof of Work (PoW):</strong> Used by Bitcoin; miners solve complex problems to add blocks.</li>
+                <li><strong>Proof of Stake (PoS):</strong> Used by Ethereum 2.0; participants stake coins to validate transactions.</li>
+            </ul>
+
+            <h3>🔹 Environmental Impact</h3>
+            <p>Bitcoin mining consumes large amounts of energy, leading to concerns about sustainability. Many projects are shifting to <b>eco-friendly alternatives</b>.</p>
+        </section>
+
+        <section id="wallets">
+            <h2>Cryptocurrency Wallets</h2>
+            <p>A cryptocurrency wallet is a digital tool that allows users to store, send, and receive cryptocurrencies securely. Wallets store <b>private keys</b>, which are essential for accessing and managing funds.</p>
+        
+            <h3>🔹 Types of Wallets</h3>
+            <ul>
+                <li><strong>Hot Wallets:</strong> Connected to the internet (e.g., MetaMask, Trust Wallet).</li>
+                <li><strong>Cold Wallets:</strong> Offline storage for security (e.g., Ledger, Trezor).</li>
+                <li><strong>Paper Wallets:</strong> Physical printouts of keys for offline storage.</li>
+            </ul>
+        
+            <h3>🔹 Choosing the Right Wallet</h3>
+            <p>For small transactions, a hot wallet is convenient. For long-term storage, a cold wallet is more secure.</p>
+        </section>
+        
+        <section id="trading">
+            <h2>Exchanges and Trading</h2>
+            <p>Cryptocurrency trading involves buying and selling assets on <b>crypto exchanges</b>. These platforms facilitate transactions between buyers and sellers.</p>
+        
+            <h3>🔹 Types of Exchanges</h3>
+            <ul>
+                <li><strong>Centralized Exchanges (CEX):</strong> Managed by a company (e.g., Binance, Coinbase).</li>
+                <li><strong>Decentralized Exchanges (DEX):</strong> Peer-to-peer trading (e.g., Uniswap, PancakeSwap).</li>
+            </ul>
+        
+            <h3>🔹 Trading Strategies</h3>
+            <ul>
+                <li><strong>Day Trading:</strong> Buying and selling within a single day.</li>
+                <li><strong>HODLing:</strong> Holding long-term for potential profit.</li>
+                <li><strong>Scalping:</strong> Making small profits frequently.</li>
+            </ul>
+        </section>
+        
+        <section id="risks">
+            <h2>Risks and Security in Cryptocurrency</h2>
+            <p>While cryptocurrencies offer financial freedom, they also come with risks such as <b>hacks, scams, volatility, and regulatory uncertainties</b>.</p>
+        
+            <h3>🔹 Common Risks</h3>
+            <ul>
+                <li><strong>Hacking:</strong> Exchange breaches have led to billion-dollar losses.</li>
+                <li><strong>Scams:</strong> Ponzi schemes and fake ICOs have cost investors millions.</li>
+                <li><strong>Market Volatility:</strong> Prices can fluctuate dramatically.</li>
+            </ul>
+        
+            <h3>🔹 Security Measures</h3>
+            <ul>
+                <li>Use <b>hardware wallets</b> for long-term storage.</li>
+                <li>Enable <b>2FA</b> (Two-Factor Authentication) on accounts.</li>
+                <li>Avoid <b>sharing private keys or clicking unknown links.</li>
+            </ul>
+        </section>
+        
+        <section id="regulations">
+            <h2>Regulation and Legal Aspects</h2>
+            <p>Governments worldwide have different stances on cryptocurrency, ranging from full acceptance to strict bans.</p>
+        
+            <h3>🔹 Global Regulations</h3>
+            <table>
+                <tr>
+                    <th>Country</th>
+                    <th>Regulation Status</th>
+                </tr>
+                <tr>
+                    <td>United States</td>
+                    <td>Taxed as property; SEC regulates securities</td>
+                </tr>
+                <tr>
+                    <td>China</td>
+                    <td>Crypto transactions banned</td>
+                </tr>
+                <tr>
+                    <td>European Union</td>
+                    <td>Working on unified regulations (MiCA)</td>
+                </tr>
+            </table>
+        
+            <h3>🔹 Key Legal Issues</h3>
+            <ul>
+                <li><b>Taxation:</b> Some countries impose capital gains tax on crypto profits.</li>
+                <li><b>Anti-Money Laundering (AML):</b> Exchanges must verify user identities.</li>
+                <li><b>Bans & Restrictions:</b> Some governments prohibit crypto trading.</li>
+            </ul>
+        </section>
+        
+        <section id="future">
+            <h2>Future of Cryptocurrency</h2>
+            <p>The cryptocurrency industry is evolving rapidly, with innovations shaping the future of digital finance.</p>
+        
+            <h3>🔹 Emerging Trends</h3>
+            <ul>
+                <li><strong>DeFi (Decentralized Finance):</strong> Eliminates middlemen in financial services.</li>
+                <li><strong>NFTs (Non-Fungible Tokens):</strong> Digital ownership of art, music, and collectibles.</li>
+                <li><strong>Web3:</strong> The next evolution of the internet using blockchain.</li>
+                <li><strong>CBDCs (Central Bank Digital Currencies):</strong> Governments exploring digital currencies.</li>
+            </ul>
+        
+            <h3>🔹 Expert Predictions</h3>
+            <ul>
+                <li>Mass adoption of Bitcoin as a store of value.</li>
+                <li>Stronger regulations to prevent fraud and hacking.</li>
+                <li>More use cases beyond finance, such as healthcare and voting.</li>
+            </ul>
+        
+            <p>With continuous innovation, cryptocurrency is set to redefine the global financial landscape.</p>
+        </section>
+
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>About CryptoTrack</h4>
+                <ul>
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">Careers</a></li>
+                    <li><a href="#">Press Kit</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h4>Products</h4>
+                <ul>
+                    <li><a href="#">Price Alerts</a></li>
+                    <li><a href="#">Portfolio Tracker</a></li>
+                    <li><a href="#">Mobile App</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h4>Support</h4>
+                <ul>
+                    <li><a href="#">Help Center</a></li>
+                    <li><a href="#">Contact Us</a></li>
+                    <li><a href="#">API Documentation</a></li>
+                </ul>
+            </div>
+        </div>
+        <p style="margin-top: 2rem; color: var(--text-gray);">© 2025 CryptoTrack. All rights reserved.</p>
+    </footer>
+
+</body>
+</html>

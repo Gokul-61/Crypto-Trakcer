@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CryptoTrack - Real-Time Cryptocurrency Tracking</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #00bcd4;
+      --primary-dark: #008c9e;
+      --bg-dark: #1a1a1a;
+      --bg-card: #2a2a2a;
+      --text-light: #ffffff;
+      --text-gray: #a0a0a0;
+      /* Add error/success colors for consistency, even if not used directly on this page */
+      --error-red: #ff4444;
+      --success-green: #00ff00;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, var(--bg-dark), #2d2d2d);
+      color: var(--text-light);
+      line-height: 1.6;
+    }
+
+    header {
+      background-color: rgba(26, 26, 26, 0.95);
+      padding: 1rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    nav {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+    }
+
+    .nav-links a {
+      color: var(--text-light);
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      transition: all 0.3s ease;
+      display: flex; /* Added for icon alignment */
+      align-items: center; /* Added for icon alignment */
+      gap: 0.5rem; /* Added for icon spacing */
+    }
+
+    .nav-links a:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: var(--primary);
+    }
+
+    .hero {
+      text-align: center;
+      padding: 4rem 1rem;
+      /* CORRECTED: Use a working image URL */
+      background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+                  url('https://via.placeholder.com/1200x400/00bcd4/ffffff?text=CryptoTrack+Your+Finance');
+      background-size: cover;
+      background-position: center;
+    }
+
+    .hero h1 {
+      font-size: 3.5rem;
+      margin-bottom: 1rem;
+      background: linear-gradient(45deg, var(--primary), #80deea);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text; /* Added for full browser support */
+    }
+
+    .hero p {
+      font-size: 1.2rem;
+      color: var(--text-gray);
+      max-width: 600px;
+      margin: 0 auto 2rem;
+    }
+
+    .cta-button {
+      padding: 1rem 2rem;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .cta-button:hover {
+      background-color: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0, 188, 212, 0.3);
+    }
+
+    .market-snapshot {
+      padding: 4rem 1rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-title {
+      text-align: center;
+      margin-bottom: 3rem;
+      font-size: 2rem;
+      color: var(--text-light);
+    }
+
+    .crypto-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+      padding: 0 1rem;
+    }
+
+    .crypto-card {
+      background: var(--bg-card);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: all 0.3s ease;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .crypto-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .crypto-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .crypto-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .crypto-price {
+      font-size: 1.8rem;
+      font-weight: bold;
+      margin: 1rem 0;
+    }
+
+    .price-change {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.9rem;
+    }
+
+    .price-change.positive {
+      background: rgba(0, 255, 0, 0.1);
+      color: #00ff00;
+    }
+
+    .price-change.negative {
+      background: rgba(255, 0, 0, 0.1);
+      color: #ff4444;
+    }
+
+    .news-section {
+      background: var(--bg-card);
+      padding: 4rem 1rem;
+    }
+
+    .news-grid {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+    }
+
+    .news-card {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .news-card:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .news-card h3 {
+      color: var(--primary);
+      margin-bottom: 1rem;
+    }
+
+    .news-card p {
+      color: var(--text-gray);
+      margin-bottom: 1rem;
+    }
+
+    .read-more {
+      color: var(--primary);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    footer {
+      background: var(--bg-dark);
+      padding: 2rem 1rem;
+      text-align: center;
+      margin-top: 4rem;
+    }
+
+    .footer-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 2rem;
+      text-align: left;
+    }
+
+    .footer-section h4 {
+      color: var(--primary);
+      margin-bottom: 1rem;
+    }
+
+    .footer-section ul {
+      list-style: none;
+    }
+
+    .footer-section ul li {
+      margin-bottom: 0.5rem;
+    }
+
+    .footer-section ul li a {
+      color: var(--text-gray);
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    .footer-section ul li a:hover {
+      color: var(--primary);
+    }
+
+    @media (max-width: 768px) {
+      .hero h1 {
+        font-size: 2.5rem;
+      }
+
+      /* Modified nav-links for mobile to ensure consistency. 
+         If you want them hidden, ensure this media query is active in global CSS. */
+      .nav-links {
+        display: none; /* Hide nav links on smaller screens if they don't fit */
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="{{ url_for('home_page') }}" class="logo">
+        <i class="fas fa-chart-line"></i>
+        CryptoTrack
+      </a>
+      <div class="nav-links">
+  <a href="{{ url_for('index') }}">
+    <i class="fas fa-table"></i>
+    <span>Markets</span>
+  </a>
+  <a href="{{ url_for('home_page') }}">
+    <i class="fas fa-home"></i>
+    <span>Dashboard</span>
+  </a>
+  <a href="{{ url_for('paper_trading_page') }}">
+    <i class="fas fa-wallet"></i>
+    <span>Paper Trading</span>
+  </a>
+  <a href="{{ url_for('news_page') }}">
+    <i class="fas fa-newspaper"></i>
+    <span>News</span>
+  </a>
+  <a href="{{ url_for('learn_page') }}">
+    <i class="fas fa-book"></i>
+    <span>Learn</span>
+  </a>
+  {% if session.user %}
+  <a href="{{ url_for('profile') }}">
+    <i class="fas fa-user"></i>
+    <span>Profile</span>
+  </a>
+  <a href="{{ url_for('logout') }}">
+    <i class="fas fa-sign-out-alt"></i>
+    <span>Logout</span>
+  </a>
+  {% else %}
+  <a href="{{ url_for('login_page') }}">
+    <i class="fas fa-sign-in-alt"></i>
+    <span>Login</span>
+  </a>
+  <a href="{{ url_for('signup_page') }}">
+    <i class="fas fa-user-plus"></i>
+    <span>Sign Up</span>
+  </a>
+  {% endif %}
+</div>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <h1>Track Crypto in Real-Time</h1>
+    <p>Stay ahead of the market with our advanced cryptocurrency tracking platform. Get real-time prices, market insights, and breaking news all in one place.</p>
+    <button class="cta-button" onclick="window.location.href='{{ url_for('index') }}';">
+      <i class="fas fa-rocket"></i> Get Started
+    </button>
+  </section>
+
+  <section id="markets" class="market-snapshot">
+    <h2 class="section-title">Market Overview</h2>
+    <div class="crypto-grid">
+      <div class="crypto-card">
+        <div class="crypto-header">
+          <div class="crypto-icon">
+            <i class="fab fa-bitcoin"></i>
+          </div>
+          <h3>Bitcoin</h3>
+        </div>
+        <div class="crypto-price">$45,000.00</div>
+        <div class="price-change positive">
+          <i class="fas fa-arrow-up"></i>
+          2.3%
+        </div>
+      </div>
+
+      <div class="crypto-card">
+        <div class="crypto-header">
+          <div class="crypto-icon">
+            <i class="fab fa-ethereum"></i>
+          </div>
+          <h3>Ethereum</h3>
+        </div>
+        <div class="crypto-price">$3,000.00</div>
+        <div class="price-change negative">
+          <i class="fas fa-arrow-down"></i>
+          1.5%
+        </div>
+      </div>
+
+      <div class="crypto-card">
+        <div class="crypto-header">
+          <div class="crypto-icon">
+            <i class="fas fa-coins"></i>
+          </div>
+          <h3>Cardano</h3>
+        </div>
+        <div class="crypto-price">$2.50</div>
+        <div class="price-change positive">
+          <i class="fas fa-arrow-up"></i>
+          4.0%
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="news-section">
+    <h2 class="section-title">Latest Crypto News</h2>
+    <div class="news-grid">
+      <div class="news-card">
+        <h3>Bitcoin Hits New Record High</h3>
+        <p>Bitcoin surges past previous resistance levels as institutional adoption continues to grow...</p>
+        <a href="#" class="read-more">
+          Read More <i class="fas fa-arrow-right"></i>
+        </a>
+      </div>
+
+      <div class="news-card">
+        <h3>Ethereum's Network Upgrade</h3>
+        <p>Major protocol improvements are coming to Ethereum. Here's what you need to know...</p>
+        <a href="#" class="read-more">
+          Read More <i class="fas fa-arrow-right"></i>
+        </a>
+      </div>
+
+      <div class="news-card">
+        <h3>2025 Market Predictions</h3>
+        <p>Industry experts share their insights on what's next for the cryptocurrency market...</p>
+        <a href="#" class="read-more">
+          Read More <i class="fas fa-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-content">
+      <div class="footer-section">
+        <h4>About CryptoTrack</h4>
+        <ul>
+          <li><a href="#">About Us</a></li>
+          <li><a href="#">Careers</a></li>
+          <li><a href="#">Press Kit</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-section">
+        <h4>Products</h4>
+        <ul>
+          <li><a href="#">Price Alerts</a></li>
+          <li><a href="#">Portfolio Tracker</a></li>
+          <li><a href="#">Mobile App</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-section">
+        <h4>Support</h4>
+        <ul>
+          <li><a href="#">Help Center</a></li>
+          <li><a href="#">Contact Us</a></li>
+          <li><a href="#">API Documentation</a></li>
+        </ul>
+      </div>
+    </div>
+    <p style="margin-top: 2rem; color: var(--text-gray);">© 2025 CryptoTrack. All rights reserved.</p>
+  </footer>
+</body>
+</html>

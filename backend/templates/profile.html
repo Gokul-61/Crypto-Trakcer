@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CryptoTrack - User Profile</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+  <style>
+    /* Include all your :root variables and styles from home.html here */
+    :root {
+      --primary: #00bcd4;
+      --primary-dark: #008c9e;
+      --bg-dark: #1a1a1a;
+      --bg-card: #2a2a2a;
+      --text-light: #ffffff;
+      --text-gray: #a0a0a0;
+      /* Added for consistency */
+      --error-red: #ff4444;
+      --success-green: #00ff00;
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, var(--bg-dark), #2d2d2d);
+      color: var(--text-light);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding-top: 5rem;
+    }
+    header {
+      background-color: rgba(26, 26, 26, 0.95);
+      padding: 1rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    nav {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--primary);
+      text-decoration: none;
+    }
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+    }
+    .nav-links a {
+      color: var(--text-light);
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .nav-links a:hover,
+    .nav-links a.active {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: var(--primary);
+    }
+    main {
+      flex-grow: 1;
+      max-width: 900px;
+      margin: 2rem auto;
+      background: var(--bg-card);
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    }
+    h1 {
+      margin-bottom: 1rem;
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 2.5rem;
+      text-align: center;
+    }
+    .profile-info {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      color: var(--text-light);
+      font-size: 1.1rem;
+    }
+    .profile-info label {
+      font-weight: 600;
+      color: var(--primary);
+    }
+    .profile-info span, .profile-info input {
+      margin-left: 0.5rem;
+      color: var(--text-gray);
+      background-color: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      padding: 0.3rem 0.6rem;
+      min-width: 200px;
+    }
+    .profile-info input {
+        color: var(--text-light);
+        font-size: 1.05rem;
+    }
+    .profile-info input:focus {
+        outline: none;
+        border-color: var(--primary);
+        background-color: rgba(0, 188, 212, 0.1);
+    }
+    .edit-profile-btn, .save-changes-btn, .cancel-edit-btn {
+      display: block;
+      margin: 2rem auto 0 auto;
+      padding: 0.75rem 2rem;
+      background-color: var(--primary);
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .edit-profile-btn:hover, .save-changes-btn:hover {
+      background-color: var(--primary-dark);
+    }
+    .edit-profile-btn { margin-top: 2rem; }
+    .edit-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+    .save-changes-btn { background-color: var(--success-green); }
+    .save-changes-btn:hover { background-color: #00cc00; }
+    .cancel-edit-btn { background-color: var(--error-red); }
+    .cancel-edit-btn:hover { background-color: #cc3333; }
+
+    /* Hide elements by default in non-edit mode */
+    .edit-mode .view-field { display: none; }
+    .edit-mode .edit-field { display: inline-block; }
+    .edit-mode .edit-profile-btn { display: none; }
+    .edit-mode .edit-buttons { display: flex; }
+    
+    /* Hide elements by default in edit mode */
+    .view-mode .edit-field,
+    .view-mode .edit-buttons { display: none; }
+    .view-mode .view-field { display: inline-block; }
+    .view-mode .edit-profile-btn { display: block; }
+
+    .profile-message {
+        margin-top: 1rem;
+        padding: 0.8rem;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        display: none;
+        text-align: center;
+    }
+    .profile-message.success {
+        background-color: rgba(0, 255, 0, 0.1);
+        color: var(--success-green);
+    }
+    .profile-message.error {
+        background-color: rgba(255, 0, 0, 0.1);
+        color: var(--error-red);
+    }
+
+    footer {
+      background: var(--bg-dark);
+      padding: 2rem 1rem;
+      text-align: center;
+      margin-top: 4rem;
+      color: var(--text-gray);
+    }
+    @media (max-width: 768px) {
+      .nav-links span {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body class="view-mode">
+  <header>
+    <nav>
+      <a href="{{ url_for('index') }}" class="logo">
+        <i class="fas fa-chart-line"></i>
+        CryptoTrack
+      </a>
+      <div class="nav-links">
+        <a href="{{ url_for('index') }}">
+          <i class="fas fa-table"></i>
+          <span>Markets</span>
+        </a>
+        <a href="{{ url_for('home_page') }}">
+          <i class="fas fa-home"></i>
+          <span>Dashboard</span>
+        </a>
+        <a href="{{ url_for('paper_trading_page') }}">
+          <i class="fas fa-wallet"></i>
+          <span>Paper Trading</span>
+        </a>
+        <a href="{{ url_for('news_page') }}">
+          <i class="fas fa-newspaper"></i>
+          <span>News</span>
+        </a>
+        <a href="{{ url_for('learn_page') }}">
+          <i class="fas fa-book"></i>
+          <span>Learn</span>
+        </a>
+        {% if session.user %}
+        <a href="{{ url_for('profile') }}" class="active">
+          <i class="fas fa-user"></i>
+          <span>Profile</span>
+        </a>
+        <a href="{{ url_for('logout') }}">
+          <i class="fas fa-sign-out-alt"></i>
+          <span>Logout</span>
+        </a>
+        {% else %}
+        <a href="{{ url_for('login_page') }}">
+          <i class="fas fa-sign-in-alt"></i>
+          <span>Login</span>
+        </a>
+        <a href="{{ url_for('signup_page') }}">
+          <i class="fas fa-user-plus"></i>
+          <span>Sign Up</span>
+        </a>
+        {% endif %}
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <h1>User Profile</h1>
+    <div id="profile-message" class="profile-message"></div>
+    <div class="profile-info">
+      <div>
+        <label>Name:</label>
+        <span class="view-field" id="view-name">{{ name }}</span>
+        <input type="text" class="edit-field" id="edit-name" value="{{ name }}">
+      </div> 
+      <div>
+        <label>Email:</label>
+        <span class="view-field" id="view-email">{{ email }}</span>
+        <input type="email" class="edit-field" id="edit-email" value="{{ email }}" disabled>
+      </div> 
+      <div>
+        <label>Username:</label>
+        <span class="view-field" id="view-username">{{ username }}</span>
+        <input type="text" class="edit-field" id="edit-username" value="{{ username }}">
+      </div> 
+      <div>
+        <label>Member Since:</label>
+        <span class="view-field" id="view-member-since">Since Joining</span>
+        <input type="text" class="edit-field" id="edit-member-since" value="Since Joining" disabled>
+      </div>
+      
+      <div id="password-fields" style="display: none;">
+        <div>
+            <label for="current-password">Current Password:</label>
+            <input type="password" class="edit-field" id="current-password" placeholder="Enter current password">
+        </div>
+        <div>
+            <label for="new-password">New Password:</label>
+            <input type="password" class="edit-field" id="new-password" placeholder="Enter new password">
+        </div>
+        <div>
+            <label for="confirm-password">Confirm New Password:</label>
+            <input type="password" class="edit-field" id="confirm-password" placeholder="Confirm new password">
+        </div>
+      </div>
+
+    </div>
+    
+    <button class="edit-profile-btn" id="edit-profile-btn">Edit Profile</button>
+    <div class="edit-buttons">
+        <button class="save-changes-btn" id="save-changes-btn">Save Changes</button>
+        <button class="cancel-edit-btn" id="cancel-edit-btn">Cancel</button>
+    </div>
+  </main>
+
+  <footer>
+    <p>© 2025 CryptoTrack. All rights reserved.</p>
+  </footer>
+
+  <script>
+    const API_BASE = 'http://127.0.0.1:5000/api';
+
+    const body = document.body;
+    const editProfileBtn = document.getElementById('edit-profile-btn');
+    const saveChangesBtn = document.getElementById('save-changes-btn');
+    const cancelEditBtn = document.getElementById('cancel-edit-btn');
+    const profileMessage = document.getElementById('profile-message');
+    const passwordFields = document.getElementById('password-fields');
+
+    const viewNameEl = document.getElementById('view-name');
+    const viewEmailEl = document.getElementById('view-email');
+    const viewUsernameEl = document.getElementById('view-username');
+    const viewMemberSinceEl = document.getElementById('view-member-since');
+
+    const editNameInput = document.getElementById('edit-name');
+    const editEmailInput = document.getElementById('edit-email');
+    const editUsernameInput = document.getElementById('edit-username');
+    const editMemberSinceInput = document.getElementById('edit-member-since');
+    const currentPasswordInput = document.getElementById('current-password');
+    const newPasswordInput = document.getElementById('new-password');
+    const confirmPasswordInput = document.getElementById('confirm-password');
+
+
+    function showMessage(type, message) {
+        profileMessage.className = `profile-message ${type}`;
+        profileMessage.textContent = message;
+        profileMessage.style.display = 'block';
+        setTimeout(() => {
+            profileMessage.style.display = 'none';
+        }, 3000);
+    }
+
+    function toggleEditMode(isEditing) {
+        if (isEditing) {
+            body.classList.remove('view-mode');
+            body.classList.add('edit-mode');
+            // Populate edit fields with current view values
+            editNameInput.value = viewNameEl.textContent;
+            editUsernameInput.value = viewUsernameEl.textContent;
+            // Show password fields
+            passwordFields.style.display = 'block';
+            // Clear password inputs
+            currentPasswordInput.value = '';
+            newPasswordInput.value = '';
+            confirmPasswordInput.value = '';
+        } else {
+            body.classList.remove('edit-mode');
+            body.classList.add('view-mode');
+            passwordFields.style.display = 'none'; // Hide password fields
+        }
+    }
+
+    editProfileBtn.addEventListener('click', () => toggleEditMode(true));
+    cancelEditBtn.addEventListener('click', () => toggleEditMode(false));
+
+    saveChangesBtn.addEventListener('click', async () => {
+        const name = editNameInput.value;
+        const username = editUsernameInput.value;
+        const currentPassword = currentPasswordInput.value;
+        const newPassword = newPasswordInput.value;
+        const confirmPassword = confirmPasswordInput.value;
+
+        if (!name || !username) {
+            showMessage('error', 'Name and Username cannot be empty.');
+            return;
+        }
+
+        if (newPassword && newPassword !== confirmPassword) {
+            showMessage('error', 'New password and confirm password do not match.');
+            return;
+        }
+
+        if (newPassword && !currentPassword) {
+            showMessage('error', 'Current password is required to change password.');
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_BASE}/profile/update`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: name,
+                    username: username,
+                    current_password: currentPassword,
+                    new_password: newPassword
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                showMessage('success', data.message);
+                // Update view fields with new data if backend confirms success
+                viewNameEl.textContent = name;
+                viewUsernameEl.textContent = username;
+                
+                toggleEditMode(false); // Switch back to view mode
+            } else {
+                showMessage('error', data.error || 'Failed to save changes.');
+            }
+        } catch (error) {
+            console.error('Error saving profile:', error);
+            showMessage('error', 'Network error or unable to connect to server.');
+        }
+    });
+  </script>
+</body>
+</html>

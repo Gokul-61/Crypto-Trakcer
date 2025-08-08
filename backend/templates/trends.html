@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cryptocurrency Trends</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #00bcd4;
+      --primary-dark: #008c9e;
+      --bg-dark: #1a1a1a;
+      --bg-card: #2a2a2a;
+      --text-light: #ffffff;
+      --text-gray: #a0a0a0;
+      --success: #4caf50;
+      --danger: #f44336;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, var(--bg-dark), #2d2d2d);
+      color: var(--text-light);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* Navigation bar styles */
+    header {
+      background-color: rgba(26, 26, 26, 0.95);
+      padding: 1rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    nav {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+    }
+
+    .nav-links a {
+      color: var(--text-light);
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .nav-links a:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: var(--primary);
+    }
+    /* End of navigation bar styles */
+
+    .container {
+      width: 95%;
+      max-width: 1200px;
+      margin: 20px auto;
+      background: var(--bg-card);
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 2.5rem;
+      color: var(--primary);
+      background: linear-gradient(45deg, var(--primary), #80deea);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .time-range {
+      text-align: center;
+      margin-bottom: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .time-range button {
+      padding: 10px 20px;
+      background-color: var(--bg-dark);
+      color: var(--text-light);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      cursor: pointer;
+      border-radius: 5px;
+      transition: all 0.3s ease;
+      flex: 1;
+      max-width: 150px;
+    }
+
+    .time-range button.active {
+      background-color: var(--primary);
+      color: white;
+      transform: scale(1.05);
+    }
+
+    .time-range button:hover {
+      background-color: var(--primary-dark);
+      color: white;
+    }
+
+    .chart-container {
+      position: relative;
+      height: 60vh;
+      max-height: 400px;
+      width: 100%;
+    }
+
+    canvas {
+      margin-top: 20px;
+    }
+
+    .highlight {
+      text-align: center;
+      font-size: 1.2rem;
+      margin-top: 20px;
+      padding: 10px;
+      color: var(--text-gray);
+      background-color: rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      margin-top: 15px;
+      gap: 10px;
+    }
+
+    .controls button {
+      padding: 5px 15px;
+      background-color: var(--bg-dark);
+      color: var(--text-light);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      cursor: pointer;
+      border-radius: 5px;
+      transition: all 0.3s ease;
+    }
+
+    .controls button:hover {
+      background-color: var(--primary-dark);
+    }
+
+    .loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 200px;
+    }
+
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      border-top-color: var(--primary);
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    .error-message {
+      color: var(--danger);
+      text-align: center;
+      padding: 20px;
+      background-color: rgba(244, 67, 54, 0.1);
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border-width: 0;
+    }
+
+    .tooltip {
+      position: absolute;
+      background-color: var(--bg-dark);
+      color: var(--text-light);
+      padding: 10px;
+      border-radius: 5px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: 10;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+      .nav-links span {
+        display: none;
+      }
+
+      .container {
+        width: 100%;
+        padding: 1rem;
+        margin: 10px auto;
+      }
+
+      h1 {
+        font-size: 1.8rem;
+      }
+
+      .time-range button {
+        padding: 8px 12px;
+      }
+
+      .highlight {
+        font-size: 1rem;
+      }
+
+      .chart-container {
+        height: 50vh;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="{{ url_for('index') }}" class="logo">
+        <i class="fas fa-chart-line"></i>
+        CryptoTrack
+      </a>
+      <div class="nav-links">
+  <a href="{{ url_for('index') }}">
+    <i class="fas fa-table"></i>
+    <span>Markets</span>
+  </a>
+  <a href="{{ url_for('home_page') }}">
+    <i class="fas fa-home"></i>
+    <span>Dashboard</span>
+  </a>
+  <a href="{{ url_for('paper_trading_page') }}">
+    <i class="fas fa-wallet"></i>
+    <span>Paper Trading</span>
+  </a>
+  <a href="{{ url_for('news_page') }}">
+    <i class="fas fa-newspaper"></i>
+    <span>News</span>
+  </a>
+  <a href="{{ url_for('learn_page') }}">
+    <i class="fas fa-book"></i>
+    <span>Learn</span>
+  </a>
+  {% if session.user %}
+  <a href="{{ url_for('profile') }}">
+    <i class="fas fa-user"></i>
+    <span>Profile</span>
+  </a>
+  <a href="{{ url_for('logout') }}">
+    <i class="fas fa-sign-out-alt"></i>
+    <span>Logout</span>
+  </a>
+  {% else %}
+  <a href="{{ url_for('login_page') }}">
+    <i class="fas fa-sign-in-alt"></i>
+    <span>Login</span>
+  </a>
+  <a href="{{ url_for('signup_page') }}">
+    <i class="fas fa-user-plus"></i>
+    <span>Sign Up</span>
+  </a>
+  {% endif %}
+</div>
+    </nav>
+  </header>
+  <div class="container">
+    <h1 id="coin-name">Loading Cryptocurrency Data...</h1>
+    <div class="time-range" role="group" aria-label="Time range selection">
+      <button data-range="1" aria-pressed="true">24 Hours</button>
+      <button data-range="7" aria-pressed="false">7 Days</button>
+      <button data-range="30" aria-pressed="false">30 Days</button>
+    </div>
+
+    <div id="chart-area">
+      <div id="loading" class="loading">
+        <div class="loading-spinner" role="status"></div>
+        <span class="sr-only">Loading data...</span>
+      </div>
+      <div id="error-container" class="error-message" style="display: none;">
+        Failed to load data. Please try again later.
+      </div>
+      <div class="chart-container" style="display: none;">
+        <canvas id="coin-chart"></canvas>
+      </div>
+    </div>
+    
+    <div id="highlight" class="highlight">Use arrow keys or the navigation buttons to explore data points</div>
+    
+    <div class="controls">
+      <button id="prev-point" aria-label="Previous data point">◀ Previous</button>
+      <button id="next-point" aria-label="Next data point">Next ▶</button>
+    </div>
+    
+    <div id="tooltip" class="tooltip"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    // DOM Elements
+    const coinNameEl = document.getElementById('coin-name');
+    const loadingEl = document.getElementById('loading');
+    const errorEl = document.getElementById('error-container');
+    const chartContainer = document.querySelector('.chart-container');
+    const highlightEl = document.getElementById('highlight');
+    const prevButton = document.getElementById('prev-point');
+    const nextButton = document.getElementById('next-point');
+    const tooltipEl = document.getElementById('tooltip');
+    
+    // App State
+    const urlParams = new URLSearchParams(window.location.search);
+    const coinId = urlParams.get('coinId') || 'bitcoin';
+    const coinName = urlParams.get('coinName') || 'Bitcoin';
+    coinNameEl.innerText = `${coinName} Price Trends`;
+    document.title = `${coinName} Price Trends | Cryptocurrency Analysis`;
+    
+    let currentRange = 7; // Default to 7 days
+    let activePointIndex = 0; // Track the currently highlighted point
+    let trendData = [];
+    let isLoading = true;
+    
+    // API related functions
+    const API_BASE_URL = 'http://127.0.0.1:5000'; // Correct base URL for Flask backend
+    
+    const fetchCoinTrends = async (coinId, days) => {
+      setLoading(true);
+      
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/cryptos/${coinId}/trends?days=${days}`);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (!data.prices || !Array.isArray(data.prices)) {
+          throw new Error('Invalid data format received');
+        }
+        
+        return data.prices.map(price => ({
+          time: new Date(price[0]),
+          value: price[1],
+        }));
+      } catch (error) {
+        console.error('Error fetching coin trends:', error);
+        showError(error.message);
+        return [];
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    // Data processing functions
+    const subsampleData = (data, desiredPoints) => {
+      if (data.length <= desiredPoints) return data;
+      
+      const step = Math.ceil(data.length / desiredPoints);
+      return data.filter((_, index) => index % step === 0).slice(0, desiredPoints);
+    };
+    
+    const groupByDate = (data) => {
+      const grouped = {};
+      
+      data.forEach(({ time, value }) => {
+        const date = time.toISOString().split('T')[0]; // Get YYYY-MM-DD
+        if (!grouped[date]) {
+          grouped[date] = { total: 0, count: 0, high: value, low: value };
+        }
+        grouped[date].total += value;
+        grouped[date].count += 1;
+        grouped[date].high = Math.max(grouped[date].high, value);
+        grouped[date].low = Math.min(grouped[date].low, value);
+      });
+      
+      return Object.entries(grouped).map(([date, { total, count, high, low }]) => ({
+        time: date,
+        value: total / count, // Average value for the date
+        high,
+        low
+      }));
+    };
+    
+    // UI handling functions
+    const setLoading = (isLoading) => {
+      loadingEl.style.display = isLoading ? 'flex' : 'none';
+      chartContainer.style.display = isLoading ? 'none' : 'block';
+      errorEl.style.display = 'none';
+    };
+    
+    const showError = (message) => {
+      errorEl.textContent = `Error: ${message || 'Failed to load data. Please try again later.'}`;
+      errorEl.style.display = 'block';
+      loadingEl.style.display = 'none';
+      chartContainer.style.display = 'none';
+    };
+    
+    const formatCurrency = (value) => {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: value >= 100 ? 2 : value >= 1 ? 4 : 6
+      }).format(value);
+    };
+    
+    const getChangePercentage = (firstValue, lastValue) => {
+      const change = ((lastValue - firstValue) / firstValue) * 100;
+      return change.toFixed(2);
+    };
+    
+    // Chart functions
+    const displayTrends = async (range) => {
+      try {
+        trendData = await fetchCoinTrends(coinId, range);
+        
+        if (!trendData.length) {
+          return showError('No data available for the selected time range');
+        }
+        
+        let processedData;
+        let timeFormat;
+        
+        if (String(range) === "1") {
+          processedData = subsampleData(trendData, 24);   // For 24-hour trend
+          timeFormat = (time) => time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        } else {
+          processedData = groupByDate(trendData);   // For 7/30 days
+          timeFormat = (time) => {
+            if (typeof time === 'string') {
+              return new Date(time).toLocaleDateString();
+            }
+            return time.toLocaleDateString();
+          };
+        }
+        
+        trendData = processedData;
+        
+        const labels = trendData.map(data => timeFormat(data.time));
+        const values = trendData.map(data => data.value);
+        const firstPrice = values[0];
+        const lastPrice = values[values.length - 1];
+        const changePercentage = getChangePercentage(firstPrice, lastPrice);
+        
+        const isPositive = lastPrice > firstPrice;
+        const gradientColor = isPositive ? 'rgba(76, 175, 80, 1)' : 'rgba(244, 67, 54, 1)';
+        const lightGradientColor = isPositive ? 'rgba(76, 175, 80, 0.1)' : 'rgba(244, 67, 54, 0.1)';
+        
+        // Set up chart
+        const ctx = document.getElementById('coin-chart').getContext('2d');
+        
+        // Create gradient for fill
+        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+        gradient.addColorStop(0, lightGradientColor);
+        gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        
+        if (window.coinChart) {
+          window.coinChart.destroy();
+        }
+        
+        window.coinChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: `${coinName} Price`,
+              data: values,
+              borderColor: gradientColor,
+              borderWidth: 2,
+              pointBackgroundColor: 'rgba(0, 188, 212, 0.8)',
+              pointHoverBackgroundColor: 'rgba(255, 255, 255, 1)',
+              pointRadius: 3,
+              pointHoverRadius: 6,
+              tension: 0.3,
+              fill: true,
+              backgroundColor: gradient
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: true,
+                position: 'top',
+                labels: {
+                  color: 'white',
+                  font: {
+                    size: 14
+                  }
+                }
+              },
+              tooltip: {
+                enabled: true,
+                backgroundColor: 'rgba(42, 42, 42, 0.9)',
+                titleColor: 'white',
+                bodyColor: 'white',
+                borderColor: 'rgba(255, 255, 255, 0.1)',
+                borderWidth: 1,
+                padding: 10,
+                displayColors: false,
+                callbacks: {
+                  label: function(context) {
+                    return `Price: ${formatCurrency(context.parsed.y)}`;
+                  }
+                }
+              }
+            },
+            interaction: {
+              intersect: false,
+              mode: 'index',
+            },
+            scales: {
+              x: { 
+                title: { 
+                  display: true, 
+                  text: range === "1" ? 'Time (HH:MM)' : 'Date',
+                  color: 'white'
+                },
+                grid: {
+                  color: 'rgba(255, 255, 255, 0.1)'
+                },
+                ticks: {
+                  color: 'rgba(255, 255, 255, 0.7)'
+                }
+              },
+              y: { 
+                title: { 
+                  display: true, 
+                  text: 'Price (USD)',
+                  color: 'white'
+                }, 
+                beginAtZero: false,
+                grid: {
+                  color: 'rgba(255, 255, 255, 0.1)'
+                },
+                ticks: {
+                  color: 'rgba(255, 255, 255, 0.7)',
+                  callback: function(value) {
+                    return formatCurrency(value);
+                  }
+                }
+              }
+            },
+            animation: {
+              duration: 1000,
+              easing: 'easeOutQuart'
+            }
+          }
+        });
+        
+        // Update summary info
+        highlightEl.innerHTML = `${range === "1" ? '24h' : range + 'd'} Change: <span style="color: ${isPositive ? 'var(--success)' : 'var(--danger)'}">
+                                  ${isPositive ? '+' : ''}${changePercentage}%</span> | Current: ${formatCurrency(lastPrice)}`;
+        
+        activePointIndex = trendData.length - 1; // Start at the most recent point
+        highlightPoint(activePointIndex);
+      } catch (error) {
+        console.error('Error displaying trends:', error);
+        showError(error.message);
+      }
+    };
+    
+    const highlightPoint = (index) => {
+      if (!trendData[index]) return;
+      
+      const point = trendData[index];
+      const formattedTime = typeof point.time === 'string' 
+        ? new Date(point.time).toLocaleString() 
+        : point.time.toLocaleString();
+      const formattedPrice = formatCurrency(point.value);
+      
+      // Additional info if available
+      let additionalInfo = '';
+      if (point.high && point.low) {
+        additionalInfo = ` | High: ${formatCurrency(point.high)} | Low: ${formatCurrency(point.low)}`;
+      }
+      
+      highlightEl.innerHTML = `Date/Time: ${formattedTime} | Price: ${formattedPrice}${additionalInfo}`;
+      
+      const chart = window.coinChart;
+      if (!chart) return;
+      
+      // Update point styles
+      chart.data.datasets[0].pointBackgroundColor = chart.data.datasets[0].data.map((_, i) =>
+        i === index ? 'rgba(255, 255, 0, 1)' : 'rgba(0, 188, 212, 0.8)'
+      );
+      
+      chart.data.datasets[0].pointRadius = chart.data.datasets[0].data.map((_, i) =>
+        i === index ? 6 : 3
+      );
+      
+      chart.update('none'); // Update without animation for better performance
+    };
+    
+    // Event handlers
+    const navigatePoints = (event) => {
+      if (!trendData.length) return;
+      
+      if (event.key === 'ArrowRight') {
+        activePointIndex = (activePointIndex + 1) % trendData.length;
+      } else if (event.key === 'ArrowLeft') {
+        activePointIndex = (activePointIndex - 1 + trendData.length) % trendData.length;
+      }
+      
+      highlightPoint(activePointIndex);
+    };
+    
+    prevButton.addEventListener('click', () => {
+      if (!trendData.length) return;
+      activePointIndex = (activePointIndex - 1 + trendData.length) % trendData.length;
+      highlightPoint(activePointIndex);
+    });
+    
+    nextButton.addEventListener('click', () => {
+      if (!trendData.length) return;
+      activePointIndex = (activePointIndex + 1) % trendData.length;
+      highlightPoint(activePointIndex);
+    });
+    
+    // Set up time range buttons
+    const buttons = document.querySelectorAll('.time-range button');
+    buttons.forEach(button => {
+      button.addEventListener('click', () => {
+        buttons.forEach(btn => {
+          btn.classList.remove('active');
+          btn.setAttribute('aria-pressed', 'false');
+        });
+        button.classList.add('active');
+        button.setAttribute('aria-pressed', 'true');
+        const range = button.getAttribute('data-range');
+        currentRange = range;
+        displayTrends(range);
+      });
+    });
+    
+    // Keyboard navigation
+    document.addEventListener('keydown', navigatePoints);
+    
+    // Initialize chart
+    displayTrends(currentRange);
+    
+    // Handle window resize
+    window.addEventListener('resize', () => {
+      if (window.coinChart) {
+        window.coinChart.resize();
+      }
+    });
+  </script>
+</body>
+</html>

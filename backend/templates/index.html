@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CryptoTrack - Cryptocurrency Market Data</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #00bcd4;
+      --primary-dark: #008c9e;
+      --bg-dark: #1f1f1f;
+      --bg-card: #2a2a2a;
+      --text-light: #ffffff;
+      --text-gray: #a0a0a0;
+      --error-red: #ff4444;
+      --success-green: #00ff00;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, var(--bg-dark), #3a3a3a);
+      color: var(--text-light);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    header {
+      background-color: rgba(26, 26, 26, 0.95);
+      padding: 1rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    nav {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+    }
+
+    .nav-links a {
+      color: var(--text-light);
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      transition: all 0.3s ease;
+      display: flex; /* Added for icon alignment */
+      align-items: center; /* Added for icon alignment */
+      gap: 0.5rem; /* Added for icon spacing */
+    }
+
+    .nav-links a:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: var(--primary);
+    }
+
+    .container {
+      width: 90%;
+      max-width: 1200px;
+      margin: 2rem auto;
+    }
+
+    .search-container {
+      background: var(--bg-card);
+      padding: 2rem;
+      border-radius: 12px;
+      margin-bottom: 2rem;
+    }
+
+    .search-bar {
+      position: relative;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .search-bar input {
+      width: 100%;
+      padding: 1rem 1rem 1rem 3rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      color: var(--text-light);
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .search-bar i {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-gray);
+    }
+
+    .search-bar input:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .crypto-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      background: var(--bg-card);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .crypto-table th,
+    .crypto-table td {
+      padding: 1rem;
+      text-align: left;
+    }
+
+    .crypto-table th {
+      background: rgba(0, 0, 0, 0.2);
+      font-weight: 600;
+      color: var(--primary);
+      text-transform: uppercase;
+      font-size: 0.9rem;
+      letter-spacing: 1px;
+    }
+
+    .crypto-table tr {
+      transition: all 0.3s ease;
+    }
+
+    .crypto-table tbody tr:hover {
+      background: rgba(255, 255, 255, 0.05);
+      cursor: pointer;
+    }
+
+    .crypto-table td {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .crypto-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .crypto-table img {
+      width: 32px;
+      height: 32px;
+      margin-right: 1rem;
+      vertical-align: middle;
+      border-radius: 50%;
+    }
+
+    .price-change {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.9rem;
+    }
+
+    .price-change.positive {
+      background: rgba(0, 255, 0, 0.1);
+      color: #00ff00;
+    }
+
+    .price-change.negative {
+      background: rgba(255, 0, 0, 0.1);
+      color: #ff4444;
+    }
+
+    .market-cap {
+      color: var(--text-gray);
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 768px) {
+      .nav-links span {
+        display: none;
+      }
+      
+      .crypto-table th:nth-child(4),
+      .crypto-table td:nth-child(4) {
+        display: none;
+      }
+      
+      .container {
+        width: 95%;
+      }
+    }
+
+    /* Custom Context Menu Styles */
+    .context-menu {
+      display: none; /* Hidden by default */
+      position: absolute;
+      background-color: var(--bg-card);
+      border-radius: 8px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      padding: 0.5rem 0;
+      z-index: 200;
+      min-width: 150px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .context-menu ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .context-menu ul li {
+      padding: 0.75rem 1.5rem;
+      color: var(--text-light);
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .context-menu ul li:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: var(--primary);
+    }
+
+    /* Modal Styles */
+    .modal-overlay {
+      display: none; /* Hidden by default */
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 300;
+    }
+
+    .modal-content {
+      background-color: var(--bg-card);
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
+      position: relative;
+    }
+
+    .modal-content h2 {
+      color: var(--primary);
+      margin-bottom: 1.5rem;
+      font-size: 1.8rem;
+    }
+
+    .modal-content label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: var(--text-gray);
+      text-align: left;
+    }
+
+    .modal-content input {
+      width: 100%;
+      padding: 0.8rem 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      background-color: rgba(255, 255, 255, 0.05);
+      color: var(--text-light);
+      font-size: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .modal-content button {
+      padding: 0.8rem 1.5rem;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      font-size: 1rem;
+      margin: 0 0.5rem;
+    }
+
+    .modal-content button:hover {
+      background-color: var(--primary-dark);
+    }
+
+    .modal-close-btn {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--text-gray);
+      cursor: pointer;
+    }
+    .modal-close-btn:hover {
+        color: var(--text-light);
+    }
+
+    .modal-message {
+        margin-top: 1rem;
+        padding: 0.8rem;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        display: none;
+    }
+    .modal-message.success {
+        background-color: rgba(0, 255, 0, 0.1);
+        color: var(--success-green);
+    }
+    .modal-message.error {
+        background-color: rgba(255, 0, 0, 0.1);
+        color: var(--error-red);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="{{ url_for('index') }}" class="logo">
+        <i class="fas fa-chart-line"></i>
+        CryptoTrack
+      </a>
+      <div class="nav-links">
+        <a href="{{ url_for('index') }}">
+          <i class="fas fa-table"></i>
+          <span>Markets</span>
+        </a>
+        <a href="{{ url_for('home_page') }}">
+          <i class="fas fa-home"></i>
+          <span>Dashboard</span>
+        </a>
+        <a href="{{ url_for('paper_trading_page') }}">
+          <i class="fas fa-wallet"></i>
+          <span>Paper Trading</span>
+        </a>
+        <a href="{{ url_for('news_page') }}">
+          <i class="fas fa-newspaper"></i>
+          <span>News</span>
+        </a>
+        <a href="{{ url_for('learn_page') }}">
+          <i class="fas fa-book"></i>
+          <span>Learn</span>
+        </a>
+        {% if session.user %}
+        <a href="{{ url_for('profile') }}">
+          <i class="fas fa-user"></i>
+          <span>Profile</span>
+        </a>
+        <a href="{{ url_for('logout') }}">
+          <i class="fas fa-sign-out-alt"></i>
+          <span>Logout</span>
+        </a>
+        {% else %}
+        <a href="{{ url_for('login_page') }}">
+          <i class="fas fa-sign-in-alt"></i>
+          <span>Login</span>
+        </a>
+        <a href="{{ url_for('signup_page') }}">
+          <i class="fas fa-user-plus"></i>
+          <span>Sign Up</span>
+        </a>
+        {% endif %}
+      </div>
+    </nav>
+  </header>
+
+  <div class="container">
+    <div class="search-container">
+      <div class="search-bar">
+        <i class="fas fa-search"></i>
+        <input 
+          type="text" 
+          id="search-input" 
+          placeholder="Search cryptocurrencies by name..."
+        >
+      </div>
+    </div>
+
+    <table class="crypto-table" id="crypto-table"> <thead>
+        <tr>
+          <th>#</th>
+          <th>Name</th>
+          <th>Price</th>
+          <th>24h Change</th>
+          <th>Market Cap</th>
+        </tr>
+      </thead>
+      <tbody id="crypto-data">
+        </tbody>
+    </table>
+  </div>
+
+  <div id="context-menu" class="context-menu">
+    <ul>
+      <li id="subscribe-option"><i class="fas fa-bell"></i> Subscribe for Alert</li>
+    </ul>
+  </div>
+
+  <div id="alert-modal" class="modal-overlay">
+    <div class="modal-content">
+      <button class="modal-close-btn" id="close-alert-modal">&times;</button>
+      <h2>Set Price Alert</h2>
+      <div id="alert-modal-message" class="modal-message"></div>
+      <p>Set an alert price for <strong id="alert-coin-name"></strong>.</p>
+      <label for="alert-price-input">Alert Price (USD):</label>
+      <input type="number" id="alert-price-input" step="0.01" placeholder="e.g., 50000.00">
+      <button id="submit-alert-price">Set Alert</button>
+    </div>
+  </div>
+
+
+  <script>
+    let allCryptoData = [];
+    let selectedCoinForAlert = null; // To store coin info for the alert modal
+
+    const fetchCryptoData = async () => {
+      try {
+        const response = await fetch('http://127.0.0.1:5000/api/cryptos');
+        allCryptoData = await response.json();
+        renderTable(allCryptoData);
+      } catch (error) {
+        console.error('Error fetching cryptocurrency data:', error);
+        // Show sample data if API fails
+        renderSampleData();
+      }
+    };
+
+    const renderSampleData = () => {
+      const sampleData = [
+        {
+          id: 'bitcoin',
+          name: 'Bitcoin',
+          image: 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png?1696501400', // CDN image URL
+          current_price: 45000,
+          price_change_percentage_24h: 2.3,
+          market_cap: 850000000000
+        },
+        {
+          id: 'ethereum',
+          name: 'Ethereum',
+          image: 'https://assets.coingecko.com/coins/images/279/small/ethereum.png?1696501628', // CDN image URL
+          current_price: 3000,
+          price_change_percentage_24h: -1.5,
+          market_cap: 350000000000
+        }
+      ];
+      renderTable(sampleData);
+    };
+
+    const renderTable = (cryptoData) => {
+      const tableBody = document.getElementById('crypto-data');
+      tableBody.innerHTML = '';
+      
+      cryptoData.forEach((coin, index) => {
+        const row = document.createElement('tr');
+        // Store coin data on the row for easy access during right-click
+        row.dataset.coinId = coin.id;
+        row.dataset.coinName = coin.name;
+
+        const priceChangeClass = coin.price_change_percentage_24h >= 0 ? 'positive' : 'negative';
+        const priceChangeIcon = coin.price_change_percentage_24h >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
+        
+        row.innerHTML = `
+          <td>${index + 1}</td>
+          <td>
+            <img src="${coin.image}" alt="${coin.name}">
+            ${coin.name}
+          </td>
+          <td>$${coin.current_price.toLocaleString()}</td>
+          <td>
+            <div class="price-change ${priceChangeClass}">
+              <i class="fas ${priceChangeIcon}"></i>
+              ${Math.abs(coin.price_change_percentage_24h).toFixed(2)}%
+            </div>
+          </td>
+          <td class="market-cap">$${coin.market_cap.toLocaleString()}</td>
+        `;
+        
+        // Left-click to go to trends page
+        row.addEventListener('click', () => {
+          window.location.href = `{{ url_for('trends_page') }}?coinId=${coin.id}&coinName=${encodeURIComponent(coin.name)}`;
+        });
+        
+        tableBody.appendChild(row);
+      });
+    };
+
+    document.getElementById('search-input').addEventListener('input', (event) => {
+      const query = event.target.value.toLowerCase();
+      const filteredData = allCryptoData.filter(coin =>
+        coin.name.toLowerCase().includes(query)
+      );
+      renderTable(filteredData);
+    });
+
+    fetchCryptoData();
+
+    // --- Context Menu and Alert Modal Logic ---
+    const contextMenu = document.getElementById('context-menu');
+    const subscribeOption = document.getElementById('subscribe-option');
+    const alertModal = document.getElementById('alert-modal');
+    const closeAlertModalBtn = document.getElementById('close-alert-modal');
+    const alertCoinNameEl = document.getElementById('alert-coin-name');
+    const alertPriceInput = document.getElementById('alert-price-input');
+    const submitAlertPriceBtn = document.getElementById('submit-alert-price');
+    const alertModalMessage = document.getElementById('alert-modal-message');
+
+    // Prevent default context menu on the table
+    document.getElementById('crypto-table').addEventListener('contextmenu', function(e) {
+        e.preventDefault(); // Prevent browser's default right-click menu
+        
+        // Check if the right-click was on a table row (tr)
+        let targetRow = e.target.closest('tr');
+        if (targetRow && targetRow.dataset.coinId) {
+            selectedCoinForAlert = {
+                id: targetRow.dataset.coinId,
+                name: targetRow.dataset.coinName
+            };
+
+            // Position the custom context menu
+            contextMenu.style.left = `${e.pageX}px`;
+            contextMenu.style.top = `${e.pageY}px`;
+            contextMenu.style.display = 'block';
+        } else {
+            // If clicked outside a row, hide the menu
+            contextMenu.style.display = 'none';
+        }
+    });
+
+    // Hide context menu when clicking anywhere else on the document
+    document.addEventListener('click', function(e) {
+        if (!contextMenu.contains(e.target)) {
+            contextMenu.style.display = 'none';
+        }
+    });
+
+    // Handle "Subscribe for Alert" option click
+    subscribeOption.addEventListener('click', function() {
+        contextMenu.style.display = 'none'; // Hide context menu
+        if (selectedCoinForAlert) {
+            alertCoinNameEl.textContent = selectedCoinForAlert.name;
+            alertPriceInput.value = ''; // Clear previous input
+            alertModalMessage.style.display = 'none'; // Hide previous messages
+            alertModal.style.display = 'flex'; // Show the modal
+        }
+    });
+
+    // Close alert modal
+    closeAlertModalBtn.addEventListener('click', function() {
+        alertModal.style.display = 'none';
+    });
+
+    // Submit alert price
+    submitAlertPriceBtn.addEventListener('click', async function() {
+        const price = parseFloat(alertPriceInput.value);
+        
+        if (isNaN(price) || price <= 0) {
+            alertModalMessage.className = 'modal-message error';
+            alertModalMessage.textContent = 'Please enter a valid price.';
+            alertModalMessage.style.display = 'block';
+            return;
+        }
+
+        if (!selectedCoinForAlert) {
+            alertModalMessage.className = 'modal-message error';
+            alertModalMessage.textContent = 'No coin selected for alert.';
+            alertModalMessage.style.display = 'block';
+            return;
+        }
+
+        // Send alert data to backend
+        try {
+            const response = await fetch('http://127.0.0.1:5000/api/alerts/subscribe', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    coin_id: selectedCoinForAlert.id,
+                    alert_price: price
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                alertModalMessage.className = 'modal-message success';
+                alertModalMessage.textContent = data.message;
+            } else {
+                alertModalMessage.className = 'modal-message error';
+                alertModalMessage.textContent = data.error || 'Failed to set alert.';
+            }
+            alertModalMessage.style.display = 'block';
+
+            // Optionally close modal after a delay on success
+            if (response.ok) {
+                setTimeout(() => {
+                    alertModal.style.display = 'none';
+                }, 2000);
+            }
+
+        } catch (error) {
+            console.error('Error setting alert:', error);
+            alertModalMessage.className = 'modal-message error';
+            alertModalMessage.textContent = 'Network error or server unavailable.';
+            alertModalMessage.style.display = 'block';
+        }
+    });
+
+  </script>
+</body>
+</html>
